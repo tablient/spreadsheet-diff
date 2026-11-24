@@ -1,0 +1,19 @@
+# Copy to .github/workflows/xlsx-diff.yml in the repository that holds your spreadsheets.
+name: Spreadsheet diff
+on:
+  pull_request:
+    paths: ["**/*.xlsx", "**/*.xlsm"]
+permissions:
+  contents: read
+  pull-requests: write
+jobs:
+  diff:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - uses: tablient/spreadsheet-diff@v1
+        # with:
+        #   summarize: "true"
+        #   anthropic-api-key: ${{ secrets.ANTHROPIC_API_KEY }}

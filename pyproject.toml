@@ -1,0 +1,26 @@
+[build-system]
+requires = ["hatchling"]
+build-backend = "hatchling.build"
+
+[project]
+name = "tablient-diffs"
+version = "0.1.0"
+description = "Readable diffs of .xlsx changes for pull requests"
+requires-python = ">=3.10"
+license = {text = "PolyForm-Shield-1.0.0"}
+authors = [{name = "Tablient"}]
+# The open Cellprose library (Apache-2.0, on PyPI) does the workbook-to-text step.
+dependencies = ["cellprose>=0.3.0,<0.4", "openpyxl>=3.1.5"]
+
+[project.optional-dependencies]
+dev = ["pytest>=9.2.0"]
+
+[project.scripts]
+tablient-diffs = "tablient_diffs.cli:main"
+xlsxdiff = "tablient_diffs.cli:main"  # the old name, kept so existing scripts keep working
+
+[tool.hatch.build.targets.wheel]
+packages = ["src/tablient_diffs"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

@@ -1,0 +1,42 @@
+name: Tablient Spreadsheet Diff
+description: Comment a readable, cell-by-cell diff of changed Excel workbooks (.xlsx, .xlsm) on every pull request.
+author: Tablient
+branding:
+  icon: grid
+  color: green
+inputs:
+  github-token:
+    description: Token used to post the comment.
+    default: ${{ github.token }}
+  summarize:
+    description: Add an AI-written summary ("true" needs anthropic-api-key).
+    default: "false"
+  anthropic-api-key:
+    description: Optional. Enables the summary.
+    required: false
+  model:
+    description: Model for the summary.
+    default: claude-haiku-5-5
+  cellprose-source:
+    description: pip requirement for the open Cellprose library that turns each workbook into text.
+    default: cellprose>=0.3.0,<0.4
+runs:
+  using: composite
+  steps:
+    - uses: actions/setup-python@v5
+      with:
+        python-version: "3.12"
+    - shell: bash
+      run: pip install "${{ inputs.cellprose-source }}" "${{ github.action_path }}"
+    - shell: bash
+      env:
+        GITHUB_TOKEN: ${{ inputs.github-token }}
+        ANTHROPIC_API_KEY: ${{ inputs.anthropic-api-key }}
+        BASE_SHA: ${{ github.event.pull_request.base.sha }}
+        HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        SUMMARIZE: ${{ inputs.summarize }}
+        MODEL: ${{ inputs.model }}
+      run: |
+        args=(pr --base "$BASE_SHA" --head "$HEAD_SHA" --model "$MODEL")
+        [ "$SUMMARIZE" = "true" ] && args+=(--summarize)
+        tablient-diffs "${args[@]}"
